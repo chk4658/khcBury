@@ -3,7 +3,10 @@ import { apiMap, urlMap } from "./map.config";
 import { pathToRegexp } from "path-to-regexp";
 
 const filters = {
-  clickFilter: (ele: HTMLElement) => !!ele.dataset["bupoint"],
+  clickFilter: (ele: HTMLElement) => {
+    console.log(ele);
+    return !!ele.dataset["bupoint"];
+  },
   /**
    * 判断路径是否在需要监听
    * @param path 要判断的路径

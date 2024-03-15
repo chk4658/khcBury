@@ -1,18 +1,12 @@
 {
-  "name": "@xmon/bury",
-  "version": "0.4.0",
-  "description": "monitor most action by mitt, 一个不入侵你业务代码的埋点系统",
+  "name": "khc-bury",
+  "version": "0.0.1",
+  "description": "Extends https://www.npmjs.com/package/@xmon/bury",
   "main": "dist/index.js",
-  "repository": "git@github.com:darkXmo/bury.git",
-  "author": "Xmo <18851989097@163.com>",
+  "repository": "https://github.com/chk4658/khcBury",
+  "author": "khc1szh",
   "keywords": [
-    "event",
-    "vue",
-    "monitor",
-    "aegis",
-    "xmon",
-    "listener",
-    "bury"
+    "khc1szh"
   ],
   "license": "MIT",
   "dependencies": {
