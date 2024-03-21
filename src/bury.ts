@@ -1,13 +1,11 @@
-import { Monitor } from "@xmon/monitor";
+import { Monitor } from "./monitor";
 import initConfig, { BuryConfig } from "./config";
-import { AxiosInstance } from "@xmon/monitor/dist/index.interface";
 import filters from "./bury.filter";
 import { BuryCallBackPayload } from "./index.interface";
 import { buryEmit, buryEmitter } from "./common";
 
 export default class Bury {
-  on = (callback: (value: BuryCallBackPayload) => void) =>
-    buryEmitter.on("bury", callback);
+  on = (callback: (value: BuryCallBackPayload) => void) => buryEmitter.on("bury", callback);
 
   config: BuryConfig = {};
   private monitor: Monitor;
@@ -22,6 +20,7 @@ export default class Bury {
   }
 
   private init(monitor: Monitor, defaultConfig: BuryConfig) {
+    this.overrideEventListeners();
     initConfig(defaultConfig).then((res) => {
       Object.assign(this.config, res);
       this.ready = true;
@@ -35,28 +34,14 @@ export default class Bury {
     });
     monitor.monitorPage();
     monitor.monitorClick(filters.clickFilter);
-    this.onAction();
     this.onClick();
-    this.onApi();
     this.onUnload();
     return buryEmitter;
   }
 
-  private onAction() {
-    this.monitor.on("Action", (payload) => {
-      const eventId = payload.eventId;
-      if (!this.ready) {
-        this.todo.push((config: BuryConfig) => {
-          buryEmit("Action", config, eventId, payload);
-        });
-      } else {
-        buryEmit("Action", this.config, eventId, payload);
-      }
-    });
-  }
-
   private onClick() {
     this.monitor.on("Click", (payload) => {
+      console.log(payload, this.ready, this.todo, this.config, payload.target, payload.target.innerText, "----");
       const eventId = payload.target.dataset["bupoint"] as string;
       if (!this.ready) {
         this.todo.push((config: BuryConfig) => {
@@ -64,22 +49,6 @@ export default class Bury {
         });
       } else {
         buryEmit("Click", this.config, eventId, payload);
-      }
-    });
-  }
-
-  private onApi() {
-    this.monitor.on("Api", (payload) => {
-      const api = filters.apiFilter(payload.url, payload.method);
-      if (api) {
-        const eventId = api.eventId;
-        if (!this.ready) {
-          this.todo.push((config: BuryConfig) => {
-            buryEmit("Api", config, eventId, payload);
-          });
-        } else {
-          buryEmit("Api", this.config, eventId, payload);
-        }
       }
     });
   }
@@ -103,34 +72,76 @@ export default class Bury {
   spy() {
     if (this.isSpy) return;
     buryEmitter.on("bury", (payload) => {
-      console.log(
-        "%c" + payload.type,
-        "color: blue; background: #bfcf5f;",
-        "|payload =>",
-        payload.payload,
-        "|extra =>",
-        payload.extra,
-        "|"
-      );
+      console.log(payload.type, payload);
     });
     this.isSpy = true;
   }
 
-  /**
-   * 当运行tracked的时候，会触发一次埋点事件onBury
-   * @param eventId 事件ID
-   */
-  tracked(eventId: string) {
-    return this.monitor.emit({ eventId });
-  }
+  overrideEventListeners() {
+    (function () {
+      "use strict";
 
-  track<T extends () => any>(fn: T, eventId: string): T {
-    return this.monitor.monitorEvent(fn, {
-      eventId,
-    }) as T;
-  }
+      // save the original methods before overwriting them
+      (Element.prototype as any)._addEventListener = Element.prototype.addEventListener;
+      (Element.prototype as any)._removeEventListener = Element.prototype.removeEventListener;
 
-  trackApi(axiosInstance: AxiosInstance) {
-    this.monitor.monitorAxios(axiosInstance);
+      /**
+       * [addEventListener description]
+       * @param {[type]}  type       [description]
+       * @param {[type]}  listener   [description]
+       * @param {Boolean} useCapture [description]
+       */
+      Element.prototype.addEventListener = function (type, listener, useCapture = false) {
+        // declare listener
+        this._addEventListener(type, listener, useCapture);
+
+        if (!this.eventListenerList) this.eventListenerList = {};
+        if (!this.eventListenerList[type]) this.eventListenerList[type] = [];
+
+        // add listener to  event tracking list
+        this.eventListenerList[type].push({ type, listener, useCapture });
+      };
+
+      /**
+       * [removeEventListener description]
+       * @param  {[type]}  type       [description]
+       * @param  {[type]}  listener   [description]
+       * @param  {Boolean} useCapture [description]
+       * @return {[type]}             [description]
+       */
+      Element.prototype.removeEventListener = function (type, listener, useCapture = false) {
+        // remove listener
+        this._removeEventListener(type, listener, useCapture);
+
+        if (!this.eventListenerList) this.eventListenerList = {};
+        if (!this.eventListenerList[type]) this.eventListenerList[type] = [];
+
+        // Find the event in the list, If a listener is registered twice, one
+        // with capture and one without, remove each one separately. Removal of
+        // a capturing listener does not affect a non-capturing version of the
+        // same listener, and vice versa.
+        for (let i = 0; i < this.eventListenerList[type].length; i++) {
+          if (this.eventListenerList[type][i].listener === listener && this.eventListenerList[type][i].useCapture === useCapture) {
+            this.eventListenerList[type].splice(i, 1);
+            break;
+          }
+        }
+        // if no more events of the removed event type are left,remove the group
+        if (this.eventListenerList[type].length == 0) delete this.eventListenerList[type];
+      };
+
+      /**
+       * [getEventListeners description]
+       * @param  {[type]} type [description]
+       * @return {[type]}      [description]
+       */
+      (Element.prototype as any).getEventListeners = function (type) {
+        if (!this.eventListenerList) this.eventListenerList = {};
+
+        // return requested listeners type or all them
+        if (type === undefined) return this.eventListenerList;
+        return this.eventListenerList[type];
+      };
+    })();
   }
 }

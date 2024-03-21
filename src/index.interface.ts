@@ -1,13 +1,8 @@
-import { Payload } from "@xmon/monitor/dist/index.interface";
+import { Payload } from "./monitor.interface";
 import { BuryConfig } from "./config";
 
 export interface BuryCallBackPayload {
-  type: "Action" | "Click" | "Leave" | "Enter" | "Api";
+  type: "Click" | "Leave" | "Enter";
   payload: BuryConfig;
-  extra?:
-    | Payload.ActionPayload
-    | Payload.ApiPayload
-    | Payload.ClickPayload
-    | Payload.LoadPayload
-    | Payload.RoutePayload;
+  extra?: Payload.ActionPayload | Payload.ApiPayload | Payload.ClickPayload | Payload.LoadPayload | Payload.RoutePayload;
 }

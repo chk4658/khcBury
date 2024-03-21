@@ -1,4 +1,4 @@
-import { MonitorVue } from "@xmon/monitor";
+import { MonitorVue } from "./monitor";
 import Bury from "./bury";
 import { BuryConfig } from "./config";
 import filters from "./bury.filter";
