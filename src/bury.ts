@@ -41,7 +41,6 @@ export default class Bury {
 
   private onClick() {
     this.monitor.on("Click", (payload) => {
-      console.log(payload, this.ready, this.todo, this.config, payload.target, payload.target.innerText, "----");
       const eventId = payload.target.dataset["bupoint"] as string;
       if (!this.ready) {
         this.todo.push((config: BuryConfig) => {

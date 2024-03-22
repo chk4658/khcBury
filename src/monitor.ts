@@ -1,5 +1,5 @@
 import mitt from "mitt";
-import { AxiosInstance, Payload, MonitorRoute, NavigationGuardNext } from "./monitor.interface";
+import { Payload, MonitorRoute, NavigationGuardNext } from "./monitor.interface";
 
 const ex: { instance: Monitor | null } = {
   instance: null,
@@ -9,13 +9,10 @@ export const monitorMitt = mitt<{
   Click: Payload.ClickPayload;
   Load: Payload.LoadPayload;
   Unload: Payload.LoadPayload;
-  Action: Payload.ActionPayload;
   Route: Payload.RoutePayload;
-  Api: Payload.ApiPayload;
 }>();
 
 export class Monitor {
-  observableEvent: [] = [];
   start: Date = new Date();
 
   /**
@@ -70,35 +67,10 @@ export class Monitor {
         time: new Date(),
       });
     });
+
     monitorMitt.on("Unload", (e) => {
       this.start = new Date();
     });
-  }
-
-  monitorEvent<T extends { [K: string]: any } = { [K: string]: any }>(fn: () => any, payload?: T): () => any {
-    return () => {
-      const ans = fn();
-      monitorMitt.emit("Action", { ...payload, origin: fn, time: new Date() });
-      return ans;
-    };
-  }
-
-  monitorAxios(axiosInstance: AxiosInstance) {
-    axiosInstance.interceptors.request.use(
-      (config) => {
-        monitorMitt.emit("Api", {
-          time: new Date(),
-          url: config.url,
-          method: config.method,
-          header: config.headers,
-          config,
-        });
-        return config;
-      },
-      (err) => {
-        return Promise.reject(err);
-      }
-    );
   }
 
   on = monitorMitt.on;

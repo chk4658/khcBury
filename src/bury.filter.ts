@@ -2,7 +2,6 @@ import { urlMap } from "./map.config";
 
 const filters = {
   clickFilter: (ele: HTMLElement) => {
-    console.log(ele, ele.hasAttribute("onclick"), (ele as any).getEventListeners(), "-");
     return !!ele.dataset["bupoint"];
   },
   /**
@@ -11,9 +10,7 @@ const filters = {
    * @returns 如果在监听的列表中，对应 path + enter + leave 对象，否则返回为undefined
    */
   urlFilter: (path: string) => {
-    console.log(urlMap);
     return urlMap.find((item) => {
-      console.log(item.path, path);
       // return pathToRegexp(item.path).test(path)
       return item.path === path;
     });
