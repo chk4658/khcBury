@@ -13,6 +13,7 @@ export default class BuryVue extends Bury {
   private initBuriedVue(monitor: MonitorVue) {
     monitor.monitorRouter();
     monitor.on("Route", (payload) => {
+      console.log(payload, "payload");
       const from = filters.urlFilter(payload.from.path);
       const to = filters.urlFilter(payload.to.path);
       if (from?.leave) {

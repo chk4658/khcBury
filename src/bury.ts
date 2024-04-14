@@ -22,6 +22,7 @@ export default class Bury {
   private init(monitor: Monitor, defaultConfig: BuryConfig) {
     this.overrideEventListeners();
     initConfig(defaultConfig).then((res) => {
+      console.log(res, "res");
       Object.assign(this.config, res);
       this.ready = true;
       const to = filters.urlFilter(window.location.pathname);
@@ -41,7 +42,7 @@ export default class Bury {
 
   private onClick() {
     this.monitor.on("Click", (payload) => {
-      const eventId = payload.target.dataset["bupoint"] as string;
+      const eventId = payload.target.dataset["bury_point"] as string;
       if (!this.ready) {
         this.todo.push((config: BuryConfig) => {
           buryEmit("Click", config, eventId, payload);
