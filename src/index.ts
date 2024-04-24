@@ -2,7 +2,7 @@ import { initMonitor, initMonitorVue, Monitor, MonitorVue } from "./monitor";
 import Bury from "./bury";
 import BuryVue from "./bury.vue";
 import { BuryConfig } from "./config";
-import { BuryCallBackPayload, RequestPayload } from "./index.interface";
+import { BuryCallBackPayload, headersParams, RequestPayload } from "./index.interface";
 
 export { initUrlMap } from "./map.config";
 
@@ -35,11 +35,12 @@ export const tracked = (payload: RequestPayload) => {
   }
 };
 
-export const sendBury = (params: RequestPayload, url: string) => {
+export const sendBury = (params: RequestPayload, headers: headersParams, url: string) => {
   fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...headers,
     },
     body: JSON.stringify(params),
   }).then();

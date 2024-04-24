@@ -1,5 +1,3 @@
-import { ActionCategory, ActionType } from "./index.interface";
-
 export interface RouteRecordNormalized {
   path: string;
   redirect: any | undefined;

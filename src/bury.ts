@@ -3,7 +3,6 @@ import initConfig, { BuryConfig } from "./config";
 import filters from "./bury.filter";
 import { ActionCategory, ActionType, BuryCallBackPayload, RequestPayload } from "./index.interface";
 import { buryEmit, buryEmitter, initBuryCallbackPayload } from "./common";
-import { Payload } from "./monitor.interface";
 import { getPath } from "./path";
 
 export default class Bury {

@@ -45,3 +45,9 @@ export interface RequestPayload {
   };
   env?: Env;
 }
+export interface headersParams {
+  ntAccount?: string;
+  appName?: string;
+  env?: Env;
+  [K: string]: any;
+}
