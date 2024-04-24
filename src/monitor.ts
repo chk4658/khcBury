@@ -53,7 +53,6 @@ export class Monitor {
         monitorMitt.emit("Load", {
           duration: 0,
           time: new Date(),
-          href: window.location.href,
         });
       },
       {
@@ -62,7 +61,6 @@ export class Monitor {
     );
     window.addEventListener("beforeunload", (e) => {
       monitorMitt.emit("Unload", {
-        href: window.location.href,
         duration: new Date().getTime() - this.start.getTime(),
         time: new Date(),
       });
@@ -78,10 +76,12 @@ export class Monitor {
 
 export class MonitorVue extends Monitor {
   private router: any;
+
   constructor(router: any) {
     super();
     this.router = router;
   }
+
   monitorRouter() {
     let start: Date;
     this.router.beforeEach((to: MonitorRoute, from: MonitorRoute, next: NavigationGuardNext) => {

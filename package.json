@@ -12,7 +12,8 @@
   "dependencies": {
     "@fingerprintjs/fingerprintjs": "^3.3.0",
     "mitt": "^3.0.0",
-    "path-to-regexp": "^6.2.0"
+    "path-to-regexp": "^6.2.0",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.15.6",

@@ -1,36 +1,31 @@
-import { Payload as monitorPayload } from "./monitor.interface";
 import mitt from "mitt";
 import { BuryConfig } from "./config";
-import { BuryCallBackPayload } from "./index.interface";
+import { BuryCallBackPayload, RequestPayload } from "./index.interface";
+import { v4 } from "uuid";
 
-type Payload = monitorPayload.ClickPayload | monitorPayload.LoadPayload | monitorPayload.RoutePayload;
+type Payload = RequestPayload;
 
-export const initBuryCallbackPayload = (type: "Click" | "Leave" | "Enter", config: BuryConfig, eventId: string, payload?: Payload): BuryCallBackPayload => {
-  const defaultValue = {
-    type,
-    payload: {
-      ...config,
-      eventId,
-      pageUrl: window.location.pathname,
-      timestamp: payload?.time.getTime().toString() ?? new Date().getTime().toString(),
+export const initBuryCallbackPayload = (config: BuryConfig, payload?: Payload): BuryCallBackPayload => {
+  const responseParams: RequestPayload = {
+    eventId: v4(),
+    ...payload,
+    data: {
+      ...payload.data,
+      buryVersion: "v2",
     },
-    extra: payload,
   };
-  if (type === "Click") {
-    return defaultValue;
-  } else if (type === "Enter") {
-    return defaultValue;
-  } else if (type === "Leave") {
-    const p = payload as monitorPayload.RoutePayload | monitorPayload.LoadPayload;
-    defaultValue.payload.pageStayTime = p.duration.toString();
-    return defaultValue;
-  }
+  return {
+    responseParams,
+    extra: {
+      ...config,
+    },
+  };
 };
 
 export const buryEmitter = mitt<{
   bury: BuryCallBackPayload;
 }>();
 
-export const buryEmit = (type: "Click" | "Leave" | "Enter", config: BuryConfig, eventId: string, payload?: Payload) => {
-  buryEmitter.emit("bury", initBuryCallbackPayload(type, config, eventId, payload));
+export const buryEmit = (config: BuryConfig, payload?: Payload) => {
+  buryEmitter.emit("bury", initBuryCallbackPayload(config, payload));
 };

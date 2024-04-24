@@ -1,3 +1,5 @@
+import { ActionCategory, ActionType } from "./index.interface";
+
 export interface RouteRecordNormalized {
   path: string;
   redirect: any | undefined;
@@ -59,16 +61,10 @@ export namespace Payload {
      * 监听事件发生的时间
      */
     time: Date;
-    /**
-     * 监听事件发生时页面的Href（即Url地址）
-     */
-    href: string;
   }
 
   export interface RoutePayload {
-    /** @type { VueRouter.RouteLocationNormalized } */
     from: MonitorRoute;
-    /** @type { VueRouter.RouteLocationNormalized } */
     to: MonitorRoute;
     /**
      * 监听事件发生的时间

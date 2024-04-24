@@ -1,8 +1,10 @@
 import { Monitor } from "./monitor";
 import initConfig, { BuryConfig } from "./config";
 import filters from "./bury.filter";
-import { BuryCallBackPayload } from "./index.interface";
-import { buryEmit, buryEmitter } from "./common";
+import { ActionCategory, ActionType, BuryCallBackPayload, RequestPayload } from "./index.interface";
+import { buryEmit, buryEmitter, initBuryCallbackPayload } from "./common";
+import { Payload } from "./monitor.interface";
+import { getPath } from "./path";
 
 export default class Bury {
   on = (callback: (value: BuryCallBackPayload) => void) => buryEmitter.on("bury", callback);
@@ -22,13 +24,18 @@ export default class Bury {
   private init(monitor: Monitor, defaultConfig: BuryConfig) {
     this.overrideEventListeners();
     initConfig(defaultConfig).then((res) => {
-      console.log(res, "res");
       Object.assign(this.config, res);
       this.ready = true;
-      const to = filters.urlFilter(window.location.pathname);
+      const to = filters.urlFilter(getPath());
       if (to?.enter) {
         const eventId = to.enter;
-        buryEmit("Enter", this.config, eventId);
+        buryEmit(this.config, {
+          actionCategory: ActionCategory.Enter,
+          actionType: ActionType.Enter,
+          actionName: eventId,
+          actionStartTimeLong: new Date().getTime(),
+          uiName: to.pathname,
+        });
       }
       this.todo.map((item) => item(res));
       this.todo.length = 0;
@@ -42,28 +49,68 @@ export default class Bury {
 
   private onClick() {
     this.monitor.on("Click", (payload) => {
-      const eventId = payload.target.dataset["bury_point"] as string;
+      const eventId = payload.target.dataset["buryId"] as string;
+      const u = filters.urlFilter(getPath());
       if (!this.ready) {
         this.todo.push((config: BuryConfig) => {
-          buryEmit("Click", config, eventId, payload);
+          buryEmit(
+            { ...config, target: payload.target },
+            {
+              actionName: eventId,
+              actionCategory: ActionCategory.Action,
+              actionType: ActionType.Click,
+              actionStartTimeLong: new Date().getTime(),
+              uiName: u.pathname,
+            }
+          );
         });
       } else {
-        buryEmit("Click", this.config, eventId, payload);
+        buryEmit(
+          { ...this.config, target: payload.target },
+          {
+            actionName: eventId,
+            actionCategory: ActionCategory.Action,
+            actionType: ActionType.Click,
+            actionStartTimeLong: new Date().getTime(),
+            uiName: u.pathname,
+          }
+        );
       }
     });
   }
 
   private onUnload() {
     this.monitor.on("Unload", (payload) => {
-      const from = filters.urlFilter(window.location.pathname);
+      const from = filters.urlFilter(getPath());
+      const aTime = new Date().getTime();
       if (from?.leave) {
         const eventId = from.leave;
         if (!this.ready) {
           this.todo.push((config: BuryConfig) => {
-            buryEmit("Leave", config, eventId, payload);
+            buryEmit(
+              { ...config, duration: payload.duration },
+              {
+                actionName: eventId,
+                actionCategory: ActionCategory.Leave,
+                actionType: ActionType.Leave,
+                actionStartTimeLong: aTime,
+                uiName: from.pathname,
+                actionEndTimeLong: aTime + payload.duration,
+              }
+            );
           });
         } else {
-          buryEmit("Leave", this.config, eventId, payload);
+          buryEmit(
+            { ...this.config, duration: payload.duration },
+            {
+              actionName: eventId,
+              actionCategory: ActionCategory.Leave,
+              actionType: ActionType.Leave,
+              actionStartTimeLong: aTime,
+              uiName: from.pathname,
+              actionEndTimeLong: aTime + payload.duration,
+            }
+          );
         }
       }
     });
@@ -71,10 +118,12 @@ export default class Bury {
 
   spy() {
     if (this.isSpy) return;
-    buryEmitter.on("bury", (payload) => {
-      console.log(payload.type, payload);
-    });
+    buryEmitter.on("bury", (payload) => {});
     this.isSpy = true;
+  }
+
+  tracked(payload: RequestPayload) {
+    buryEmitter.emit("bury", initBuryCallbackPayload(this.config, payload));
   }
 
   overrideEventListeners() {

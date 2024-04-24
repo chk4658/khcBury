@@ -2,8 +2,7 @@ import { initMonitor, initMonitorVue, Monitor, MonitorVue } from "./monitor";
 import Bury from "./bury";
 import BuryVue from "./bury.vue";
 import { BuryConfig } from "./config";
-import { BuryCallBackPayload } from "./index.interface";
-import { BuryExpression } from "./passingReferences.interface";
+import { BuryCallBackPayload, RequestPayload } from "./index.interface";
 
 export { initUrlMap } from "./map.config";
 
@@ -28,20 +27,28 @@ export const init = (
   return (ex.instance = new Bury(monitor, config));
 };
 
+export const tracked = (payload: RequestPayload) => {
+  if (ex.instance) {
+    return ex.instance.tracked(payload);
+  } else {
+    throw new Error("Monitor should be init first | 你可能没有初始化Bury实例");
+  }
+};
+
+export const sendBury = (params: RequestPayload, url: string) => {
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  }).then();
+};
+
 export const onBury = (callback: (value: BuryCallBackPayload) => void) => {
   if (ex.instance) {
     return ex.instance.on(callback);
   } else {
     throw new Error("Monitor should be init first | 你可能没有初始化Bury实例");
   }
-};
-
-export const initDataSetDirective = () => {
-  return {
-    bind(el, binding) {
-      const { actionType, actionName, position } = binding.value as BuryExpression;
-      if (!actionName || !position || !actionType) throw new Error("actionName, position, actionType is required");
-      el.setAttribute("data-bury_point", JSON.stringify({ actionType, actionName, position }));
-    },
-  };
 };
