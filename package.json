@@ -1,6 +1,6 @@
 {
   "name": "khc-bury",
-  "version": "0.0.4",
+  "version": "1.0.0",
   "description": "Extends https://www.npmjs.com/package/@xmon/bury",
   "main": "dist/index.js",
   "repository": "https://github.com/chk4658/khcBury",
