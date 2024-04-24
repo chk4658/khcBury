@@ -49,6 +49,7 @@ export default class Bury {
   private onClick() {
     this.monitor.on("Click", (payload) => {
       const eventId = payload.target.dataset["buryId"] as string;
+      const position = payload.target.dataset["buryPosition"] || "";
       const u = filters.urlFilter(getPath());
       if (!this.ready) {
         this.todo.push((config: BuryConfig) => {
@@ -59,7 +60,7 @@ export default class Bury {
               actionCategory: ActionCategory.Action,
               actionType: ActionType.Click,
               actionStartTimeLong: new Date().getTime(),
-              uiName: u.pathname,
+              uiName: u.pathname + position,
             }
           );
         });
