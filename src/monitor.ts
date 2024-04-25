@@ -5,12 +5,13 @@ const ex: { instance: Monitor | null } = {
   instance: null,
 };
 
-export const monitorMitt = mitt<{
-  Click: Payload.ClickPayload;
-  Load: Payload.LoadPayload;
-  Unload: Payload.LoadPayload;
-  Route: Payload.RoutePayload;
-}>();
+// mitt<{
+//   Click: Payload.ClickPayload;
+//   Load: Payload.LoadPayload;
+//   Unload: Payload.LoadPayload;
+//   Route: Payload.RoutePayload;
+// }>();
+export const monitorMitt = new mitt();
 
 export class Monitor {
   start: Date = new Date();

@@ -22,9 +22,10 @@ export const initBuryCallbackPayload = (config: BuryConfig, payload?: Payload): 
   };
 };
 
-export const buryEmitter = mitt<{
-  bury: BuryCallBackPayload;
-}>();
+// export const buryEmitter = mitt<{
+//   bury: BuryCallBackPayload;
+// }>();
+export const buryEmitter = new mitt();
 
 export const buryEmit = (config: BuryConfig, payload?: Payload) => {
   buryEmitter.emit("bury", initBuryCallbackPayload(config, payload));

@@ -1,6 +1,6 @@
 {
   "name": "khc-bury",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Extends https://www.npmjs.com/package/@xmon/bury",
   "main": "dist/index.js",
   "repository": "https://github.com/chk4658/khcBury",
@@ -10,7 +10,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "mitt": "^3.0.0",
+    "mitt": "1.1.2",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
