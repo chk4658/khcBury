@@ -10,46 +10,53 @@ const ex: { instance: Bury | null } = {
   instance: null,
 };
 
-export const init = (
-  config: BuryConfig,
-  router?: {
-    beforeEach: (guard: any) => () => void;
-    push: any;
-    afterEach: (guard: any) => () => void;
-    [K: string]: any;
-  }
-) => {
-  if (router) {
-    const monitor: MonitorVue = initMonitorVue(router);
-    return (ex.instance = new BuryVue(monitor, config));
-  }
-  const monitor: Monitor = initMonitor();
-  return (ex.instance = new Bury(monitor, config));
-};
+export default class KhcBury {
+  static ExistedBury = new Set();
 
-export const tracked = (payload: RequestPayload) => {
-  if (ex.instance) {
-    return ex.instance.tracked(payload);
-  } else {
-    throw new Error("Monitor should be init first | 你可能没有初始化Bury实例");
-  }
-};
+  static init = (
+    config: BuryConfig,
+    router?: {
+      beforeEach: (guard: any) => () => void;
+      push: any;
+      afterEach: (guard: any) => () => void;
+      [K: string]: any;
+    }
+  ) => {
+    if (router) {
+      const monitor: MonitorVue = initMonitorVue(router);
+      return (ex.instance = new BuryVue(monitor, config));
+    }
+    const monitor: Monitor = initMonitor();
+    return (ex.instance = new Bury(monitor, config));
+  };
 
-export const sendBury = (params: RequestPayload, headers: headersParams, url: string) => {
-  fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...headers,
-    },
-    body: JSON.stringify(params),
-  }).then();
-};
+  static tracked = (payload: RequestPayload) => {
+    if (ex.instance) {
+      return ex.instance.tracked(payload);
+    } else {
+      throw new Error("Monitor should be init first | 你可能没有初始化Bury实例");
+    }
+  };
 
-export const onBury = (callback: (value: BuryCallBackPayload) => void) => {
-  if (ex.instance) {
-    return ex.instance.on(callback);
-  } else {
-    throw new Error("Monitor should be init first | 你可能没有初始化Bury实例");
-  }
-};
+  static sendBury = (params: RequestPayload, headers: headersParams, url: string) => {
+    KhcBury.ExistedBury.add(params.actionName);
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...headers,
+      },
+      body: JSON.stringify(params),
+    })
+      .then()
+      .catch();
+  };
+
+  static onBury = (callback: (value: BuryCallBackPayload) => void) => {
+    if (ex.instance) {
+      return ex.instance.on(callback);
+    } else {
+      throw new Error("Monitor should be init first | 你可能没有初始化Bury实例");
+    }
+  };
+}

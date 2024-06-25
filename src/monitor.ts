@@ -76,7 +76,7 @@ export class Monitor {
 }
 
 export class MonitorVue extends Monitor {
-  private router: any;
+  public router: any;
 
   constructor(router: any) {
     super();

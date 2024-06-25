@@ -9,8 +9,7 @@ export default class Bury {
   on = (callback: (value: BuryCallBackPayload) => void) => buryEmitter.on("bury", callback);
 
   config: BuryConfig = {};
-  private monitor: Monitor;
-  private isSpy: boolean = false;
+  protected monitor: Monitor;
   protected todo: ((config: BuryConfig) => void)[] = [];
 
   protected ready = false;
@@ -20,12 +19,16 @@ export default class Bury {
     this.init(monitor, config);
   }
 
+  getFilterUrl() {
+    return filters.urlFilter(getPath());
+  }
+
   private init(monitor: Monitor, defaultConfig: BuryConfig) {
     this.overrideEventListeners();
     initConfig(defaultConfig).then((res) => {
       Object.assign(this.config, res);
       this.ready = true;
-      const to = filters.urlFilter(getPath());
+      const to = this.getFilterUrl();
       if (to?.enter) {
         const eventId = to.enter;
         buryEmit(this.config, {
@@ -34,6 +37,9 @@ export default class Bury {
           actionName: eventId,
           actionStartTimeLong: new Date().getTime(),
           uiName: to.pathname,
+          data: {
+            path: to.path,
+          },
         });
       }
       this.todo.map((item) => item(res));
@@ -50,7 +56,7 @@ export default class Bury {
     this.monitor.on("Click", (payload) => {
       const eventId = payload.target.dataset["buryId"] as string;
       const position = payload.target.dataset["buryPosition"] || "";
-      const u = filters.urlFilter(getPath());
+      const u = this.getFilterUrl();
       if (!this.ready) {
         this.todo.push((config: BuryConfig) => {
           buryEmit(
@@ -60,7 +66,10 @@ export default class Bury {
               actionCategory: ActionCategory.Action,
               actionType: ActionType.Click,
               actionStartTimeLong: new Date().getTime(),
-              uiName: u.pathname + position,
+              uiName: `${u.pathname}${position ? "_" : ""}${position}`,
+              data: {
+                path: u.path,
+              },
             }
           );
         });
@@ -72,7 +81,10 @@ export default class Bury {
             actionCategory: ActionCategory.Action,
             actionType: ActionType.Click,
             actionStartTimeLong: new Date().getTime(),
-            uiName: u.pathname,
+            uiName: `${u.pathname}${position ? "_" : ""}${position}`,
+            data: {
+              path: u.path,
+            },
           }
         );
       }
@@ -81,7 +93,7 @@ export default class Bury {
 
   private onUnload() {
     this.monitor.on("Unload", (payload) => {
-      const from = filters.urlFilter(getPath());
+      const from = this.getFilterUrl();
       const aTime = new Date().getTime();
       if (from?.leave) {
         const eventId = from.leave;
@@ -96,6 +108,10 @@ export default class Bury {
                 actionStartTimeLong: aTime,
                 uiName: from.pathname,
                 actionEndTimeLong: aTime + payload.duration,
+                data: {
+                  path: from.path,
+                  duration: payload.duration,
+                },
               }
             );
           });
@@ -109,17 +125,15 @@ export default class Bury {
               actionStartTimeLong: aTime,
               uiName: from.pathname,
               actionEndTimeLong: aTime + payload.duration,
+              data: {
+                path: from.path,
+                duration: payload.duration,
+              },
             }
           );
         }
       }
     });
-  }
-
-  spy() {
-    if (this.isSpy) return;
-    buryEmitter.on("bury", (payload) => {});
-    this.isSpy = true;
   }
 
   tracked(payload: RequestPayload) {
