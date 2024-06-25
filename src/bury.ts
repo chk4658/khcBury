@@ -137,7 +137,20 @@ export default class Bury {
   }
 
   tracked(payload: RequestPayload) {
-    buryEmitter.emit("bury", initBuryCallbackPayload(this.config, payload));
+    const u = this.getFilterUrl();
+    if (payload && payload.actionName && u) {
+      const position = payload.uiName || "";
+      buryEmitter.emit(
+        "bury",
+        initBuryCallbackPayload(this.config, {
+          ...payload,
+          actionCategory: payload.actionCategory || ActionCategory.Action,
+          actionType: payload.actionType || ActionType.Click,
+          actionStartTimeLong: new Date().getTime(),
+          uiName: `${u.pathname}${position ? "_" : ""}${position}`,
+        })
+      );
+    }
   }
 
   overrideEventListeners() {

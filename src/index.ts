@@ -2,7 +2,7 @@ import { initMonitor, initMonitorVue, Monitor, MonitorVue } from "./monitor";
 import Bury from "./bury";
 import BuryVue from "./bury.vue";
 import { BuryConfig } from "./config";
-import { BuryCallBackPayload, headersParams, RequestPayload } from "./index.interface";
+import { ActionCategory, ActionType, BuryCallBackPayload, headersParams, RequestPayload } from "./index.interface";
 
 export { initUrlMap } from "./map.config";
 
@@ -11,7 +11,9 @@ const ex: { instance: Bury | null } = {
 };
 
 export default class KhcBury {
-  static ExistedBury = new Set();
+  static AC = ActionCategory;
+
+  static AT = ActionType;
 
   static init = (
     config: BuryConfig,
@@ -39,7 +41,6 @@ export default class KhcBury {
   };
 
   static sendBury = (params: RequestPayload, headers: headersParams, url: string) => {
-    KhcBury.ExistedBury.add(params.actionName);
     fetch(url, {
       method: "POST",
       headers: {

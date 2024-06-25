@@ -4,19 +4,21 @@ import { BuryConfig } from "./config";
 import filters from "./bury.filter";
 import { buryEmit } from "./common";
 import { ActionCategory, ActionType } from "./index.interface";
+import { getPath } from "./path";
 
 export default class BuryVue extends Bury {
-  private readonly router: any;
+  private route: any;
 
   constructor(monitor: MonitorVue, config: BuryConfig) {
     super(monitor, config);
-    this.router = monitor.router;
     this.initBuriedVue(monitor);
   }
 
   private initBuriedVue(monitor: MonitorVue) {
     monitor.monitorRouter();
     monitor.on("Route", (payload) => {
+      this.route = payload.to;
+
       const from = filters.urlFilter(payload.from.path, payload.from);
       const to = filters.urlFilter(payload.to.path, payload.to);
       if (from?.leave) {
@@ -33,8 +35,10 @@ export default class BuryVue extends Bury {
                 uiName: from.pathname,
                 actionEndTimeLong: payload.time.getTime() + payload.duration,
                 data: {
-                  path: to.path,
+                  path: from.path,
                   duration: payload.duration,
+                  query: payload.from.query,
+                  params: payload.from.params,
                 },
               }
             );
@@ -50,8 +54,10 @@ export default class BuryVue extends Bury {
               uiName: from.pathname,
               actionEndTimeLong: payload.time.getTime() + payload.duration,
               data: {
-                path: to.path,
+                path: from.path,
                 duration: payload.duration,
+                query: payload.from.query,
+                params: payload.from.params,
               },
             }
           );
@@ -72,6 +78,8 @@ export default class BuryVue extends Bury {
                 actionEndTimeLong: payload.time.getTime() + payload.duration,
                 data: {
                   path: to.path,
+                  query: payload.to.query,
+                  params: payload.to.params,
                 },
               }
             );
@@ -88,6 +96,8 @@ export default class BuryVue extends Bury {
               actionEndTimeLong: payload.time.getTime() + payload.duration,
               data: {
                 path: to.path,
+                query: payload.to.query,
+                params: payload.to.params,
               },
             }
           );
@@ -97,6 +107,7 @@ export default class BuryVue extends Bury {
   }
 
   getFilterUrl() {
-    return filters.urlFilter(this.router.path, this.router);
+    if (!this.route) return filters.urlFilter(getPath());
+    else return filters.urlFilter(this.route.path, this.route);
   }
 }
