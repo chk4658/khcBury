@@ -56,6 +56,7 @@ export default class Bury {
     this.monitor.on("Click", (payload) => {
       const eventId = payload.target.dataset["buryId"] as string;
       const position = payload.target.dataset["buryPosition"] || "";
+      const innerText = (payload.target.innerText || "").slice(0, 100);
       const u = this.getFilterUrl();
       if (!this.ready) {
         this.todo.push((config: BuryConfig) => {
@@ -69,6 +70,7 @@ export default class Bury {
               uiName: `${u.pathname}${position ? "_" : ""}${position}`,
               data: {
                 path: u.path,
+                innerText,
               },
             }
           );
@@ -84,6 +86,7 @@ export default class Bury {
             uiName: `${u.pathname}${position ? "_" : ""}${position}`,
             data: {
               path: u.path,
+              innerText,
             },
           }
         );
