@@ -75,7 +75,6 @@ export default class BuryVue extends Bury {
                 actionType: ActionType.Leave,
                 actionStartTimeLong: payload.time.getTime(),
                 uiName: to.pathname,
-                actionEndTimeLong: payload.time.getTime() + payload.duration,
                 data: {
                   path: to.path,
                   query: payload.to.query,
@@ -93,7 +92,6 @@ export default class BuryVue extends Bury {
               actionType: ActionType.Leave,
               actionStartTimeLong: payload.time.getTime(),
               uiName: to.pathname,
-              actionEndTimeLong: payload.time.getTime() + payload.duration,
               data: {
                 path: to.path,
                 query: payload.to.query,

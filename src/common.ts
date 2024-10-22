@@ -11,7 +11,6 @@ export const initBuryCallbackPayload = (config: BuryConfig, payload?: Payload): 
     ...payload,
     data: {
       ...payload.data,
-      buryVersion: "v2",
     },
   };
   return {
