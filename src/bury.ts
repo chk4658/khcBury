@@ -97,7 +97,6 @@ export default class Bury {
   private onUnload() {
     this.monitor.on("Unload", (payload) => {
       const from = this.getFilterUrl();
-      const aTime = new Date().getTime();
       if (from?.leave) {
         const eventId = from.leave;
         if (!this.ready) {
@@ -108,9 +107,9 @@ export default class Bury {
                 actionName: eventId,
                 actionCategory: ActionCategory.Leave,
                 actionType: ActionType.Leave,
-                actionStartTimeLong: aTime,
+                actionStartTimeLong: payload.time - payload.duration,
                 uiName: from.pathname,
-                actionEndTimeLong: aTime + payload.duration,
+                actionEndTimeLong: payload.time,
                 data: {
                   path: from.path,
                   duration: payload.duration,
@@ -125,9 +124,9 @@ export default class Bury {
               actionName: eventId,
               actionCategory: ActionCategory.Leave,
               actionType: ActionType.Leave,
-              actionStartTimeLong: aTime,
+              actionStartTimeLong: payload.time - payload.duration,
               uiName: from.pathname,
-              actionEndTimeLong: aTime + payload.duration,
+              actionEndTimeLong: payload.time,
               data: {
                 path: from.path,
                 duration: payload.duration,

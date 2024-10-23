@@ -14,11 +14,12 @@ const filters = {
     if (path === "/" || !path) return undefined;
     let pathname = path.startsWith("/") ? path.substring(1) : path;
 
+    const title = route?.meta?.title || route?.name || pathname;
     return {
       path,
-      pathname: `[${pathname}]`,
-      enter: `[${pathname}]Enter`,
-      leave: `[${pathname}]Leave`,
+      pathname: `[${route ? title : pathname}]`,
+      enter: `[${title}]Enter`,
+      leave: `[${title}]Leave`,
     };
   },
 };

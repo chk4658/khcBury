@@ -5,12 +5,6 @@ const ex: { instance: Monitor | null } = {
   instance: null,
 };
 
-// mitt<{
-//   Click: Payload.ClickPayload;
-//   Load: Payload.LoadPayload;
-//   Unload: Payload.LoadPayload;
-//   Route: Payload.RoutePayload;
-// }>();
 export const monitorMitt = new mitt();
 
 export class Monitor {
@@ -48,27 +42,12 @@ export class Monitor {
   }
 
   monitorPage() {
-    window.addEventListener(
-      "load",
-      () => {
-        monitorMitt.emit("Load", {
-          duration: 0,
-          time: new Date(),
-        });
-      },
-      {
-        passive: true,
-      }
-    );
     window.addEventListener("beforeunload", (e) => {
+      const now = new Date();
       monitorMitt.emit("Unload", {
-        duration: new Date().getTime() - this.start.getTime(),
-        time: new Date(),
+        duration: now.getTime() - this.start.getTime(),
+        time: now,
       });
-    });
-
-    monitorMitt.on("Unload", (e) => {
-      this.start = new Date();
     });
   }
 
@@ -84,22 +63,18 @@ export class MonitorVue extends Monitor {
   }
 
   monitorRouter() {
-    let start: Date;
-    this.router.beforeEach((to: MonitorRoute, from: MonitorRoute, next: NavigationGuardNext) => {
-      if (!start) {
-        start = this.start;
-        next();
-        return;
-      }
-      const duration = new Date().getTime() - start.getTime();
+    let start = null;
+    this.router.afterEach((to: MonitorRoute, from: MonitorRoute) => {
+      const now = new Date();
+      const duration = start ? now.getTime() - this.start.getTime() : null;
       monitorMitt.emit("Route", {
         from,
         to,
-        time: new Date(),
+        time: now,
         duration,
       });
-      this.start = new Date();
-      next();
+      this.start = now;
+      start = now;
     });
   }
 }

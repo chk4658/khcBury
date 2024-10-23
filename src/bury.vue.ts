@@ -21,7 +21,7 @@ export default class BuryVue extends Bury {
 
       const from = filters.urlFilter(payload.from.path, payload.from);
       const to = filters.urlFilter(payload.to.path, payload.to);
-      if (from?.leave) {
+      if (from?.leave && payload.duration !== null) {
         const eventId = from.leave;
         if (!this.ready) {
           this.todo.push((config: BuryConfig) => {
@@ -31,9 +31,9 @@ export default class BuryVue extends Bury {
                 actionName: eventId,
                 actionCategory: ActionCategory.Leave,
                 actionType: ActionType.Leave,
-                actionStartTimeLong: payload.time.getTime(),
+                actionStartTimeLong: payload.time.getTime() - payload.duration,
                 uiName: from.pathname,
-                actionEndTimeLong: payload.time.getTime() + payload.duration,
+                actionEndTimeLong: payload.time.getTime(),
                 data: {
                   path: from.path,
                   duration: payload.duration,
@@ -50,9 +50,9 @@ export default class BuryVue extends Bury {
               actionName: eventId,
               actionCategory: ActionCategory.Leave,
               actionType: ActionType.Leave,
-              actionStartTimeLong: payload.time.getTime(),
+              actionStartTimeLong: payload.time.getTime() - payload.duration,
               uiName: from.pathname,
-              actionEndTimeLong: payload.time.getTime() + payload.duration,
+              actionEndTimeLong: payload.time.getTime(),
               data: {
                 path: from.path,
                 duration: payload.duration,
@@ -105,7 +105,7 @@ export default class BuryVue extends Bury {
   }
 
   getFilterUrl() {
-    if (!this.route) return filters.urlFilter(getPath());
+    if (!this.route) return null;
     else return filters.urlFilter(this.route.path, this.route);
   }
 }
