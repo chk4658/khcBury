@@ -17,9 +17,9 @@ const filters = {
     const title = route?.meta?.title || route?.name || pathname;
     return {
       path,
-      pathname: `[${route ? title : pathname}]`,
-      enter: `[${title}]Enter`,
-      leave: `[${title}]Leave`,
+      pathname: `${route ? title : pathname}`,
+      enter: `${title}Enter`,
+      leave: `${title}Leave`,
     };
   },
 };
